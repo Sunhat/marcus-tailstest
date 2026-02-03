@@ -100,6 +100,9 @@ Considered building this in Laravel for my own comparison, but out of time
 
 4. How could we improve this test?
 
+Backend test doesn't specify how code should be run, but that's okay?
+
+I set up tests + API, but no CLI.
 
 ---
 
