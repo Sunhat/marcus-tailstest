@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+COMPOSE="docker compose"
+SERVICE="marcus_tails"           # matches your container_name / service name
+PORT="${APP_PORT:-6767}"         # fallback if not set in .env
+
+# Helper: run a command inside the app container
+dc_exec() {
+  $COMPOSE exec -it "$SERVICE" "$@"
+}
+
+# Helper: run a one-off command (like pytest, pip install)
+dc_run() {
+  $COMPOSE run --rm "$SERVICE" "$@"
+}
+
+# Print help
+show_help() {
+  cat << 'EOF'
+Usage: ./run [command] [args...]
+
+Common commands:
+  up                  Start containers in background
+  down                Stop and remove containers
+  build               Rebuild the image
+  restart             Restart the service
+  logs                Follow logs
+  bash / sh           Open interactive shell inside container
+  pytest              Run all tests (or pass args: ./run pytest -k nearby)
+  test                Alias for pytest
+  install             Install / update Python dependencies (pip install -r requirements.txt)
+  pip                 Run pip commands (e.g. ./run pip install httpx)
+  ps                  Show container status
+  exec <cmd>          Run any command inside container (e.g. ./run exec ls -la /app/data)
+
+If no command given → shows status (docker compose ps)
+
+Examples:
+  ./run up
+  ./run pytest -v
+  ./run bash
+  ./run logs -f
+EOF
+}
+
+# Main logic
+if [ $# -eq 0 ]; then
+  $COMPOSE ps
+  exit 0
+fi
+
+cmd="$1"
+shift || true
+
+case "$cmd" in
+  up)
+    $COMPOSE up -d "$@"
+    ;;
+
+  down|stop)
+    $COMPOSE down "$@"
+    ;;
+
+  build)
+    echo "Building image (branch: ${BRANCH:-unknown})..."
+    $COMPOSE build "$@"
+    ;;
+
+  restart)
+    $COMPOSE restart "$@"
+    ;;
+
+  logs)
+    $COMPOSE logs -f "$@"
+    ;;
+
+  bash|sh|shell)
+    dc_exec bash || dc_exec sh
+    ;;
+
+  pytest|test)
+    dc_run pytest "$@"
+    ;;
+
+  install)
+    echo "Installing production + dev dependencies..."
+    dc_run bash -c "pip install -r requirements.txt && pip install -r requirements-dev.txt"
+    ;;
+
+  pip)
+    dc_run pip "$@"
+    ;;
+
+  exec)
+    if [ $# -eq 0 ]; then
+      echo "Error: provide a command, e.g. ./run exec ls -la"
+      exit 1
+    fi
+    dc_exec "$@"
+    ;;
+
+  ps)
+    $COMPOSE ps
+    ;;
+
+  help|--help|-h)
+    show_help
+    ;;
+
+  *)
+    # Pass anything else directly to docker compose
+    $COMPOSE "$cmd" "$@"
+    ;;
+esac
