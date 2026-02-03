@@ -1,7 +1,10 @@
 
 # How to run
 
-
+```
+cp .env.example .env
+```
+Then
 ```
 ./develop up
 ```
