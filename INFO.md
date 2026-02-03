@@ -39,7 +39,7 @@ To run tests
 1. Mount the app
 2. Named marcus so it doesn't conflict with other code tests / other containers
 3. PYTHONUNBUFFERED=1, so logs are apparently easier to read in Docker
-4. No .env COPIED or added as volume attachment. --reload doesn't detect .env changes which is lame. And Docker is injecting .env as env vars anyway.
+4. No .env COPIED or added as volume attachment. --reload doesn't detect .env changes which is lame. Docker is injecting .env as env vars via docker-compose.
 
 
 ### No venv
@@ -51,6 +51,9 @@ Not necessary because we have Docker. Could be nice to have for personal prefere
 1. Python 3 latest
 2. FastAPI because README said you like it
 3. Pydantic Models
+4. Uvicorn to run app
+5. httpx for HTTP Client
+6. Separate requirements-dev for pytest
 
 ### AI Usage
 
