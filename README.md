@@ -1,4 +1,10 @@
+
+# PLEASE READ INFO.md
+
+For details on set up, details, and replies to questions, see INFO.md
+
 # Coding Test for tails.com
+
 
 ## Overview
 
